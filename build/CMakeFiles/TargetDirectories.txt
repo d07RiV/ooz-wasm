@@ -1,0 +1,3 @@
+C:/Projects/ooz-wasm/build/CMakeFiles/ooz.dir
+C:/Projects/ooz-wasm/build/CMakeFiles/edit_cache.dir
+C:/Projects/ooz-wasm/build/CMakeFiles/rebuild_cache.dir

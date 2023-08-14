@@ -1,0 +1,5 @@
+# ninja log v5
+17	790	7137386372054336	CMakeFiles/ooz.dir/lib/bitknit.cpp.o	c1cdcc4fd56070e0
+35	1028	7137386374514333	CMakeFiles/ooz.dir/lib/lzna.cpp.o	98f2542a4c4871c1
+27	1188	7137386376134319	CMakeFiles/ooz.dir/lib/kraken.cpp.o	d0ff2068553e7d8f
+1189	6595	7137386429819317	ooz.js	287133a9aa8e0c13
