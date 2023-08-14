@@ -5,7 +5,6 @@ var oozModule = require('./build/ooz.js');
 var OOZ_SAFE_SPACE = 64;
 
 var module_ = null;
-var lastDecompressionPtr_ = 0;
 
 function load () {
   if (!module_) {
@@ -17,20 +16,15 @@ function load () {
 /**
  * @param {Uint8Array} data 
  * @param {number} rawSize 
- * @returns {Promise<Uint8Array>}
+ * @param {function} callback
+ * @returns {Promise<ReturnType<callback>>}
  */
-function decompressUnsafe (data, rawSize) {
+function decompressCallback (data, rawSize, callback) {
   return load().then(module => {
-    if (lastDecompressionPtr_) {
-      module._free(lastDecompressionPtr_);
-      lastDecompressionPtr_ = 0;
-    }
-
     var compressedPtr = module._malloc(data.byteLength);
     module.HEAPU8.set(data, compressedPtr);
 
     var decompressedPtr = module._malloc(rawSize + OOZ_SAFE_SPACE);
-    lastDecompressionPtr_ = decompressedPtr;
 
     var res = module._Kraken_Decompress(
       compressedPtr, data.byteLength,
@@ -46,7 +40,12 @@ function decompressUnsafe (data, rawSize) {
       throw new Error('Decompresed size is different from expected');
     }
 
-    return module.HEAPU8.subarray(decompressedPtr, decompressedPtr + rawSize);
+    var slice = module.HEAPU8.subarray(decompressedPtr, decompressedPtr + rawSize);
+    var result = callback(slice);
+
+    module._free(decompressedPtr);
+
+    return result;
   })
 }
 
@@ -56,17 +55,9 @@ function decompressUnsafe (data, rawSize) {
  * @returns {Promise<Uint8Array>}
  */
 function decompress (data, rawSize) {
-  return decompressUnsafe(data, rawSize).then(decompressed => {
-    const decompressedCopy = new Uint8Array(decompressed.byteLength);
-    decompressedCopy.set(decompressed);
-
-    module._free(lastDecompressionPtr_);
-    lastDecompressionPtr_ = 0;
-
-    return decompressedCopy;
-  });
+  return decompressCallback(data, rawSize, (decompressed) => decompressed.slice());
 }
 
 exports.load = load;
-exports.decompressUnsafe = decompressUnsafe;
+exports.decompressCallback = decompressCallback;
 exports.decompress = decompress;
